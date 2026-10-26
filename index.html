@@ -71,7 +71,7 @@
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between">
 
   <!-- Floating WhatsApp Button -->
-  <a href="https://wa.me/963969537664?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%20%D9%85%D8%AA%D8%AC%D8%B1%20%D8%B1%D9%88%D9%86%D8%B2%D9%8A%D9%8A%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%BDD9%85%D9%8AA%D8%AA%D8%AC%D8%A7%D8%AA" 
+  <a href="https://wa.me/963969537664?text=مرحباً%20متجر%20رونزي،%20أريد%20الاستفسار%20عن%20المنتجات" 
      target="_blank" 
      rel="noopener noreferrer" 
      class="fixed bottom-6 right-6 z-40 bg-emerald-500 hover:bg-emerald-600 text-white p-4 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center gap-2 group"
@@ -272,6 +272,7 @@
       <div class="flex gap-4">
         <a href="#home" class="hover:text-white">الرئيسية</a>
         <a href="#products" class="hover:text-white">المنتجات</a>
+        <a href="admin.html" class="hover:text-white">لوحة التحكم</a>
       </div>
     </div>
   </footer>
@@ -387,7 +388,7 @@
 
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">ملاحظات إضافية (اختياري)</label>
-            <input id="customerNote" placeholder="وقت التسليم المفضل أو أي ملاحظة..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#0D2855] focus:outline-none" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+            <input id="customerNote" placeholder="وقت التسليم المفضل أو أي ملاحظة..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
           </div>
 
           <!-- Payment Options -->
@@ -555,6 +556,125 @@
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0D2855] text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-bold z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-4"></div>
 
   <script>
+/**
+ * رونزي — ربط صفحة المتجر (index.html) ببيانات لوحة التحكم
+ * يستبدل مصفوفة المنتجات المدمجة بالمنتجات المحفوظة من admin.html
+ * ويحدّث رقم الواتساب وحساب شام كاش وكود الكوبون ونسبة الخصم تلقائياً.
+ */
+function applyDashboardData() {
+  const cfg = window.RONZI_STORE || {};
+  const dashProducts = window.RONZI_PRODUCTS;
+
+  const wa = String(cfg.whatsapp || '963969537664').replace(/[^0-9]/g, '');
+  const sham = cfg.shamcash || '0969537664@shamcash';
+
+  // 1) استبدال المنتجات المدمجة بمنتجات الداشبورد (إن وجدت)
+  if (Array.isArray(dashProducts) && dashProducts.length) {
+    products.length = 0;
+    dashProducts.forEach(function (p) {
+      products.push({
+        id: Number(p.id),
+        name: p.name,
+        cat: p.cat || '',
+        price: Number(p.price) || 0,
+        tag: p.tag || '',
+        rating: p.rating || '',
+        desc: p.desc || '',
+        colors: (Array.isArray(p.colors) && p.colors.length)
+          ? p.colors.map(function (c) { return { name: c.name, icon: c.icon || '📦' }; })
+          : [{ name: 'افتراضي', icon: '📦' }]
+      });
+    });
+  }
+
+  // 2) تحديث روابط الواتساب في كل الصفحة
+  document.querySelectorAll('a[href*="wa.me/"]').forEach(function (a) {
+    a.setAttribute('href', a.getAttribute('href').replace(/wa\.me\/\d+/, 'wa.me/' + wa));
+  });
+
+  // 3) تحديث رقم الواتساب المعروض نصياً
+  document.querySelectorAll('a[href^="https://wa.me/"]').forEach(function (a) {
+    const txt = a.textContent || '';
+    if (txt.indexOf('+963') !== -1) {
+      a.textContent = 'تواصل على +' + wa;
+    }
+  });
+
+  // 4) تحديث حساب شام كاش المعروض
+  document.querySelectorAll('div').forEach(function (el) {
+    if (el.children.length === 0 && el.textContent.indexOf('@shamcash') !== -1) {
+      el.textContent = sham;
+    }
+  });
+
+  // 5) تحديث اسم المتجر في الترويسة
+  if (cfg.nameAr || cfg.nameEn) {
+    document.querySelectorAll('span').forEach(function (el) {
+      if (el.textContent.trim() === 'RONZI') el.textContent = (cfg.nameEn || 'RONZI').split(' ')[0].toUpperCase();
+    });
+  }
+}
+
+// 6) كود الكوبون ونسبة الخصم من الداشبورد
+function dashboardCouponConfig() {
+  const cfg = window.RONZI_STORE || {};
+  return {
+    code: String(cfg.coupon || 'ulebi').trim().toLowerCase(),
+    percent: Number(cfg.discountPercent) || 20
+  };
+}
+
+/** يُستدعى من زر تطبيق الكوبون في المتجر */
+function ronziCheckCoupon(inputValue) {
+  const conf = dashboardCouponConfig();
+  return String(inputValue || '').trim().toLowerCase() === conf.code ? conf.percent : 0;
+}
+
+/**
+ * رونزي — جسر البيانات بين لوحة التحكم والمتجر
+ * يقرأ من localStorage مفتاح ronziData الذي تكتبه لوحة التحكم (admin.html)
+ */
+(function () {
+  const STORAGE_KEY = 'ronziData';
+
+  const DEFAULTS = {
+    store: {
+      nameAr: 'متجر رونزي',
+      nameEn: 'Ronzi Store',
+      whatsapp: '963969537664',
+      shamcash: '0969537664@shamcash',
+      coupon: 'ulebi',
+      discountPercent: 20,
+      currency: 'ل.س'
+    },
+    products: []
+  };
+
+  function read() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (err) {
+      console.warn('تعذر قراءة بيانات المتجر، سيتم استخدام البيانات المدمجة.', err);
+      return null;
+    }
+  }
+
+  const data = read();
+
+  // المتجر يقرأ من لوحة التحكم إذا كانت البيانات موجودة، وإلا يكمل بالبيانات المدمجة
+  window.RONZI_STORE = Object.assign({}, DEFAULTS.store, (data && data.store) || {});
+  window.RONZI_PRODUCTS = data && Array.isArray(data.products) && data.products.length
+    ? data.products.filter(function (p) { return p.active !== false; })
+    : null;
+
+  window.RONZI_HAS_DASHBOARD_DATA = !!window.RONZI_PRODUCTS;
+})();
+
+  </script>
+
+  <script>
     const products = [
       {
         id: 1,
@@ -571,7 +691,7 @@
       },
       {
         id: 2,
-        name: 'مبرد جوال مائي ثلجي',
+        name: 'مبرّد جوال مائي ثلجي',
         cat: 'إكسسوارات الجوال',
         price: 1100,
         tag: 'الأكثر مبيعاً',
@@ -850,7 +970,7 @@
         const p = products.find(prod => prod.id === parseInt(idStr));
         if (p) sub += p.price * cart[key];
       });
-      const disc = couponApplied ? Math.round(sub * 0.20) : 0;
+      const disc = couponApplied ? Math.round(sub * (dashboardCouponConfig().percent / 100)) : 0;
       return { sub, disc, total: sub - disc };
     }
 
@@ -906,9 +1026,10 @@
     document.getElementById('applyCoupon').onclick = () => {
       const val = document.getElementById('couponInput').value.trim().toLowerCase();
       const status = document.getElementById('couponStatus');
-      if (val === 'ulebi') {
+      const couponPct = ronziCheckCoupon(val);
+      if (couponPct > 0) {
         couponApplied = true;
-        status.textContent = '✓ تم تفعيل كوبون الخصم 20% بنجاح!';
+        status.textContent = '✓ تم تفعيل كوبون الخصم ' + couponPct + '% بنجاح!';
         status.className = 'text-xs font-bold mt-1.5 text-emerald-600';
       } else {
         couponApplied = false;
@@ -1123,6 +1244,8 @@
         t.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
       }, 3000);
     }
+
+    applyDashboardData();
 
     renderProducts();
     renderCart();
