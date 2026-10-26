@@ -1,1 +1,1281 @@
-__WORKSPACE_FILE__:scratch/admin.html
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم رونزي | Ronzi Store Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary-navy: #0D2855;
+    --primary-navy-dark: #071733;
+    --accent-orange: #F26522;
+    --accent-orange-hover: #D95314;
+    --bg-light: #F1F5F9;
+  }
+  body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--bg-light);
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  .fade-in { animation: fadeIn .25s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .modal-shell { animation: popIn .2s ease-out; }
+  @keyframes popIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body class="text-slate-900 antialiased">
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#071733] via-[#0D2855] to-[#163a75]">
+  <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 fade-in">
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-16 h-16 rounded-2xl bg-[#0D2855] flex items-center justify-center p-3 shadow-lg mb-4">
+        <svg viewBox="0 0 100 100" class="w-full h-full">
+          <path d="M20,15 L60,15 C75,15 85,25 85,40 C85,55 75,65 60,65 L40,65 L40,85 L20,85 Z" fill="#FFFFFF"/>
+          <path d="M40,32 L58,32 C65,32 70,36 70,42 C70,48 65,52 58,52 L40,52 Z" fill="#0D2855"/>
+          <polygon points="55,65 85,65 85,95" fill="#F26522"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-black text-[#0D2855]">لوحة تحكم رونزي</h1>
+      <p class="text-slate-500 text-sm mt-1">سجّل دخولك للوصول إلى إدارة المتجر</p>
+    </div>
+
+    <form id="loginForm" class="space-y-4" novalidate>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني أو اسم المستخدم</label>
+        <input id="loginUser" type="text" autocomplete="username" placeholder="admin@ronzi.store"
+               class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور</label>
+        <div class="relative">
+          <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••"
+                 class="w-full px-4 py-3 pl-11 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+          <button type="button" id="togglePassBtn" class="absolute left-3 top-3.5 text-slate-400 hover:text-slate-700" tabindex="-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="loginError" class="hidden text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-2.5 rounded-xl"></div>
+
+      <button type="submit" class="w-full bg-[#F26522] hover:bg-[#D95314] text-white py-3.5 rounded-xl font-black shadow-lg transition-all hover:scale-[1.01] active:scale-95">
+        تسجيل الدخول
+      </button>
+    </form>
+
+    <div class="mt-6 pt-5 border-t border-slate-200">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5">
+        <div class="text-[11px] font-black text-amber-800 mb-1">🔑 بيانات الدخول الافتراضية (النسخة التجريبية)</div>
+        <div class="text-[11px] text-amber-700 leading-relaxed">
+          اسم المستخدم: <span class="font-mono font-bold">admin</span><br>
+          كلمة المرور: <span class="font-mono font-bold">admin123</span>
+        </div>
+        <div class="text-[10px] text-amber-600 mt-2">غيّرها فوراً من قسم «المستخدمون» بعد الدخول.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="appScreen" class="hidden min-h-screen">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 right-0 bottom-0 w-64 bg-[#0D2855] text-white z-40 flex flex-col transform translate-x-full lg:translate-x-0 transition-transform duration-300">
+    <div class="p-5 border-b border-white/10 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-2">
+        <svg viewBox="0 0 100 100" class="w-full h-full">
+          <path d="M20,15 L60,15 C75,15 85,25 85,40 C85,55 75,65 60,65 L40,65 L40,85 L20,85 Z" fill="#0D2855"/>
+          <polygon points="55,65 85,65 85,95" fill="#F26522"/>
+        </svg>
+      </div>
+      <div>
+        <div class="font-black text-lg leading-none">RONZI</div>
+        <div class="text-[10px] font-bold text-[#F26522] tracking-widest">لوحة التحكم</div>
+      </div>
+      <button id="closeSidebar" class="lg:hidden mr-auto text-white/60 hover:text-white p-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <nav class="flex-grow p-3 space-y-1 overflow-y-auto">
+      <button data-nav="overview" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+        <span class="text-lg">📊</span> نظرة عامة
+      </button>
+      <button data-nav="products" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+        <span class="text-lg">📦</span> المنتجات
+        <span id="navProductCount" class="mr-auto text-[10px] bg-white/15 px-2 py-0.5 rounded-full">0</span>
+      </button>
+      <button data-nav="users" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+        <span class="text-lg">👥</span> المستخدمون
+        <span id="navUserCount" class="mr-auto text-[10px] bg-white/15 px-2 py-0.5 rounded-full">0</span>
+      </button>
+      <button data-nav="settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+        <span class="text-lg">⚙️</span> إعدادات المتجر
+      </button>
+    </nav>
+
+    <div class="p-4 border-t border-white/10 space-y-2">
+      <a href="index.html" class="flex items-center gap-2 text-xs font-bold text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">
+        🛍️ عرض المتجر
+      </a>
+      <button id="logoutBtn" class="w-full flex items-center gap-2 text-xs font-bold text-rose-300 hover:text-white px-3 py-2 rounded-lg hover:bg-rose-500/20 transition-colors">
+        🚪 تسجيل الخروج
+      </button>
+    </div>
+  </aside>
+
+  <div id="sidebarOverlay" class="hidden fixed inset-0 bg-slate-900/50 z-30 lg:hidden"></div>
+
+  <!-- Main -->
+  <main class="lg:mr-64 min-h-screen flex flex-col">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+      <div class="px-4 sm:px-6 py-3.5 flex items-center gap-3">
+        <button id="openSidebar" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <div>
+          <h1 id="pageTitle" class="font-black text-lg text-[#0D2855]">نظرة عامة</h1>
+          <p id="pageSub" class="text-xs text-slate-500">ملخص حالة المتجر</p>
+        </div>
+        <div class="mr-auto flex items-center gap-3">
+          <div class="hidden sm:flex flex-col items-end">
+            <span id="topUserName" class="text-xs font-bold text-slate-800">—</span>
+            <span id="topUserRole" class="text-[10px] text-slate-500">—</span>
+          </div>
+          <div id="topUserAvatar" class="w-9 h-9 rounded-xl bg-[#0D2855] text-white flex items-center justify-center font-black text-sm">A</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-grow p-4 sm:p-6">
+
+      <!-- ---- OVERVIEW ---- -->
+      <section data-page="overview" class="page hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">📦</span>
+              <span class="text-[10px] font-black text-[#F26522] bg-orange-50 px-2 py-1 rounded-full">منتجات</span>
+            </div>
+            <div id="statProducts" class="text-3xl font-black text-[#0D2855]">0</div>
+            <div class="text-xs text-slate-500 mt-1">إجمالي المنتجات</div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">💰</span>
+              <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">قيمة</span>
+            </div>
+            <div id="statValue" class="text-2xl font-black text-[#0D2855]">0</div>
+            <div class="text-xs text-slate-500 mt-1">قيمة المخزون الكلية</div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">👥</span>
+              <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">حسابات</span>
+            </div>
+            <div id="statUsers" class="text-3xl font-black text-[#0D2855]">0</div>
+            <div class="text-xs text-slate-500 mt-1">مستخدمو الداشبورد</div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">🏷️</span>
+              <span class="text-[10px] font-black text-slate-600 bg-slate-100 px-2 py-1 rounded-full">أقسام</span>
+            </div>
+            <div id="statCats" class="text-3xl font-black text-[#0D2855]">0</div>
+            <div class="text-xs text-slate-500 mt-1">عدد الأقسام</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 class="font-black text-[#0D2855]">أحدث المنتجات</h2>
+              <button data-goto="products" class="text-xs font-bold text-[#F26522] hover:underline">إدارة الكل ←</button>
+            </div>
+            <div id="recentProducts" class="divide-y divide-slate-100"></div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 class="font-black text-[#0D2855]">صلاحيات سريعة</h2>
+              <button data-goto="users" class="text-xs font-bold text-[#F26522] hover:underline">المستخدمون ←</button>
+            </div>
+            <div class="p-5 space-y-3">
+              <a href="index.html" class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 transition-colors">
+                <span class="text-2xl">🛍️</span>
+                <div class="flex-grow">
+                  <div class="font-bold text-sm text-slate-800">فتح صفحة المتجر</div>
+                  <div class="text-xs text-slate-500">شاهد كيف تظهر التعديلات للزوار</div>
+                </div>
+                <span class="text-slate-400">←</span>
+              </a>
+              <button id="exportBtn" class="w-full flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 transition-colors text-right">
+                <span class="text-2xl">⬇️</span>
+                <div class="flex-grow">
+                  <div class="font-bold text-sm text-slate-800">تصدير نسخة احتياطية</div>
+                  <div class="text-xs text-slate-500">ملف JSON يحوي كل المنتجات والمستخدمين</div>
+                </div>
+                <span class="text-slate-400">←</span>
+              </button>
+              <button id="resetBtn" class="w-full flex items-center gap-4 p-4 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-100 transition-colors text-right">
+                <span class="text-2xl">♻️</span>
+                <div class="flex-grow">
+                  <div class="font-bold text-sm text-rose-700">إعادة ضبط المصنع</div>
+                  <div class="text-xs text-rose-500">ارجاع كل البيانات للوضع الافتراضي</div>
+                </div>
+                <span class="text-rose-300">←</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- PRODUCTS ---- -->
+      <section data-page="products" class="page hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div class="relative flex-grow max-w-md">
+            <input id="productSearch" type="text" placeholder="ابحث بالاسم أو القسم..."
+                   class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-[#0D2855]">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <button id="addProductBtn" class="bg-[#F26522] hover:bg-[#D95314] text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-md transition-all active:scale-95 whitespace-nowrap">
+            + إضافة منتج
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-sm">
+              <thead class="bg-slate-50 text-slate-600 text-xs font-black">
+                <tr>
+                  <th class="py-3 px-4">المنتج</th>
+                  <th class="py-3 px-4">القسم</th>
+                  <th class="py-3 px-4">السعر</th>
+                  <th class="py-3 px-4 text-center">الألوان</th>
+                  <th class="py-3 px-4 text-center">الحالة</th>
+                  <th class="py-3 px-4 text-center">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="productsTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <div id="productsEmpty" class="hidden p-12 text-center text-slate-400">
+            <div class="text-5xl mb-3">📦</div>
+            <h3 class="font-bold text-slate-700">لا توجد منتجات</h3>
+            <p class="text-xs mt-1">ابدأ بإضافة أول منتج للمتجر</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- USERS ---- -->
+      <section data-page="users" class="page hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div>
+            <h2 class="font-black text-[#0D2855]">حسابات الداشبورد</h2>
+            <p class="text-xs text-slate-500 mt-1">أضف مستخدمين وحدد صلاحيات كل واحد منهم</p>
+          </div>
+          <button id="addUserBtn" class="bg-[#F26522] hover:bg-[#D95314] text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-md transition-all active:scale-95 whitespace-nowrap">
+            + إضافة مستخدم
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="usersGrid"></div>
+
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-2xl p-5">
+          <h3 class="font-black text-sm text-blue-900 mb-2">ℹ️ ملاحظة عن الصلاحيات</h3>
+          <ul class="text-xs text-blue-800 leading-relaxed space-y-1">
+            <li><b>مدير عام:</b> كل الصلاحيات — يضيف ويعدّل ويحذف المنتجات والمستخدمين.</li>
+            <li><b>محرر:</b> يضيف ويعدّل المنتجات، بس ما يقدر يمسح الحسابات.</li>
+            <li><b>مشاهد:</b> يطّلع على البيانات فقط بدون أي تعديل.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ---- SETTINGS ---- -->
+      <section data-page="settings" class="page hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h2 class="font-black text-[#0D2855] mb-1">بيانات المتجر</h2>
+            <p class="text-xs text-slate-500 mb-5">هذه البيانات تظهر في ترويسة المتجر ومشاركته</p>
+            <form id="storeForm" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم المتجر (عربي)</label>
+                <input id="storeNameAr" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم المتجر (إنجليزي)</label>
+                <input id="storeNameEn" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">رقم الواتساب (بصيغة دولية بدون +)</label>
+                <input id="storeWhatsapp" dir="ltr" placeholder="963969537664" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">حساب شام كاش</label>
+                <input id="storeShamcash" dir="ltr" placeholder="0969537664@shamcash" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">كود كوبون الخصم</label>
+                <input id="storeCoupon" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">نسبة الخصم (%)</label>
+                <input id="storeDiscount" type="number" min="0" max="90" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+              </div>
+              <button type="submit" class="w-full bg-[#0D2855] hover:bg-[#071733] text-white py-3 rounded-xl font-black text-sm shadow-md transition-all">
+                حفظ إعدادات المتجر
+              </button>
+            </form>
+          </div>
+
+          <div class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+              <h2 class="font-black text-[#0D2855] mb-1">تغيير كلمة المرور</h2>
+              <p class="text-xs text-slate-500 mb-5">غيّر كلمة مرور حسابك الحالي</p>
+              <form id="passForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور الحالية</label>
+                  <input id="oldPass" type="password" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور الجديدة</label>
+                  <input id="newPass" type="password" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5">تأكيد كلمة المرور</label>
+                  <input id="confirmPass" type="password" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-[#0D2855] hover:bg-[#071733] text-white py-3 rounded-xl font-black text-sm shadow-md transition-all">
+                  تحديث كلمة المرور
+                </button>
+              </form>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+              <h3 class="font-black text-sm text-amber-900 mb-2">⚠️ حدّ الاستخدام الحالي</h3>
+              <p class="text-xs text-amber-800 leading-relaxed">
+                البيانات محفوظة بمتصفح هذا الجهاز فقط (localStorage). يعني المنتجات اللي تضيفها هنا
+                ما رح يشوفها زوار المتجر من أجهزتهم. لمّا ننتقل للخيار 2 (سيرفر + قاعدة بيانات)،
+                كل شي بيصير مشترك بين كل الزوار.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="px-6 py-4 text-center text-[11px] text-slate-400 border-t border-slate-200 bg-white">
+      لوحة تحكم رونزي — نسخة تجريبية محلية · <span id="footerVersion">v1.0</span>
+    </footer>
+  </main>
+</div>
+
+<!-- ============ PRODUCT MODAL ============ -->
+<div id="productModal" class="fixed inset-0 z-50 bg-slate-900/70 hidden place-items-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl relative my-8 modal-shell">
+    <button data-close-modal="productModal" class="absolute top-5 left-5 text-slate-400 hover:text-slate-700 p-1">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+    <h2 id="productModalTitle" class="text-xl font-black text-[#0D2855] mb-6">إضافة منتج جديد</h2>
+
+    <form id="productForm" class="space-y-4" novalidate>
+      <input type="hidden" id="pfId">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم المنتج *</label>
+          <input id="pfName" required placeholder="مثال: مايك لاسلكي احترافي" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">القسم *</label>
+          <input id="pfCat" required list="catList" placeholder="مثال: الصوتيات" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+          <datalist id="catList"></datalist>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">السعر (ل.س) *</label>
+          <input id="pfPrice" type="number" min="0" required placeholder="2800" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">التقييم</label>
+          <input id="pfRating" placeholder="4.9" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">الشارة</label>
+          <input id="pfTag" placeholder="جديد ومميز" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">الوصف *</label>
+        <textarea id="pfDesc" rows="3" required placeholder="وصف مختصر وجاذب للمنتج..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none resize-y"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">الألوان / الأنواع المتاحة</label>
+        <div id="colorRows" class="space-y-2"></div>
+        <button type="button" id="addColorRow" class="mt-2 text-xs font-bold text-[#F26522] hover:underline">+ إضافة لون آخر</button>
+      </div>
+
+      <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+        <input id="pfActive" type="checkbox" checked class="w-4 h-4 accent-[#F26522]">
+        <span class="text-sm font-bold text-slate-700">منتج ظاهر في المتجر</span>
+      </label>
+
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <button type="submit" class="flex-1 bg-[#F26522] hover:bg-[#D95314] text-white py-3.5 rounded-xl font-black text-sm shadow-md transition-all">
+          حفظ المنتج
+        </button>
+        <button type="button" data-close-modal="productModal" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3.5 rounded-xl font-bold text-sm">
+          إلغاء
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ USER MODAL ============ -->
+<div id="userModal" class="fixed inset-0 z-50 bg-slate-900/70 hidden place-items-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl relative my-8 modal-shell">
+    <button data-close-modal="userModal" class="absolute top-5 left-5 text-slate-400 hover:text-slate-700 p-1">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+    <h2 id="userModalTitle" class="text-xl font-black text-[#0D2855] mb-6">إضافة مستخدم</h2>
+
+    <form id="userForm" class="space-y-4" novalidate>
+      <input type="hidden" id="ufId">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">الاسم الكامل *</label>
+        <input id="ufName" required placeholder="مثال: محمد الأحمد" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم المستخدم *</label>
+        <input id="ufUser" required dir="ltr" placeholder="mohammed" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني (اختياري)</label>
+        <input id="ufEmail" type="email" dir="ltr" placeholder="user@ronzi.store" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">الصلاحية *</label>
+        <select id="ufRole" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+          <option value="admin">مدير عام — كل الصلاحيات</option>
+          <option value="editor" selected>محرر — إدارة المنتجات</option>
+          <option value="viewer">مشاهد — قراءة فقط</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور *</label>
+        <input id="ufPass" type="text" required placeholder="6 أحرف على الأقل" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0D2855] focus:outline-none">
+        <p id="ufPassHint" class="text-[11px] text-slate-500 mt-1.5">تُخزَّن محلياً بشكل واضح — مناسبة للتجربة فقط.</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <button type="submit" class="flex-1 bg-[#F26522] hover:bg-[#D95314] text-white py-3.5 rounded-xl font-black text-sm shadow-md transition-all">
+          حفظ المستخدم
+        </button>
+        <button type="button" data-close-modal="userModal" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3.5 rounded-xl font-bold text-sm">
+          إلغاء
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div id="confirmModal" class="fixed inset-0 z-[60] bg-slate-900/70 hidden place-items-center p-4">
+  <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center modal-shell">
+    <div id="confirmIcon" class="text-5xl mb-3">⚠️</div>
+    <h2 id="confirmTitle" class="font-black text-lg text-[#0D2855] mb-2">تأكيد</h2>
+    <p id="confirmText" class="text-sm text-slate-600 mb-6">هل أنت متأكد؟</p>
+    <div class="flex gap-3">
+      <button id="confirmYes" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl font-black text-sm">نعم، تأكيد</button>
+      <button id="confirmNo" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 rounded-xl font-bold text-sm">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0D2855] text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-bold z-[70] transition-all duration-300 opacity-0 pointer-events-none translate-y-4"></div>
+
+<script>
+/* =========================================================
+   رونزي — طبقة البيانات المشتركة
+   المفتاح الوحيد: ronziData  (تقرأه صفحة المتجر أيضاً)
+   ========================================================= */
+const STORAGE_KEY = 'ronziData';
+
+const DEFAULT_DATA = {
+  version: 1,
+  store: {
+    nameAr: 'متجر رونزي',
+    nameEn: 'Ronzi Store',
+    whatsapp: '963969537664',
+    shamcash: '0969537664@shamcash',
+    coupon: 'ulebi',
+    discountPercent: 20,
+    currency: 'ل.س'
+  },
+  products: [
+    {
+      id: 1,
+      name: 'مايك لاسلكي احترافي',
+      cat: 'الصوتيات',
+      price: 2800,
+      tag: 'جديد ومميز',
+      rating: '4.9 ★★★★★',
+      desc: 'ميكروفون لاسلكي ذكي بجودة صوت عالية ونقاء ممتاز للمحتوى والتسجيل عالي الدقة، مدى تغطية يصل إلى 20 متراً مع خاصية إلغاء الضوضاء الذكية.',
+      colors: [
+        { name: 'أسود ملكي', icon: '🎙️' },
+        { name: 'فضي مطفي', icon: '🎤' }
+      ],
+      active: true,
+      createdAt: '2026-10-25T10:00:00.000Z'
+    },
+    {
+      id: 2,
+      name: 'مبرّد جوال مائي ثلجي',
+      cat: 'إكسسوارات الجوال',
+      price: 1100,
+      tag: 'الأكثر مبيعاً',
+      rating: '4.8 ★★★★★',
+      desc: 'تبريد مائي وفائق السرعة لحماية الجوال من الارتفاع المفاجئ للحرارة أثناء اللعب والاستخدام الثقيل، تصميم هادئ جداً مع إضاءة RGB.',
+      colors: [
+        { name: 'أسود تيتانيوم', icon: '❄️' },
+        { name: 'أبيض ثلجي', icon: '🧊' },
+        { name: 'أزرق دراك', icon: '🔵' }
+      ],
+      active: true,
+      createdAt: '2026-10-25T10:05:00.000Z'
+    }
+  ],
+  users: [
+    {
+      id: 1,
+      name: 'مدير المتجر',
+      username: 'admin',
+      email: 'admin@ronzi.store',
+      password: 'admin123',
+      role: 'admin',
+      active: true,
+      createdAt: '2026-10-25T09:00:00.000Z'
+    }
+  ]
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(DEFAULT_DATA);
+    const parsed = JSON.parse(raw);
+    return {
+      version: parsed.version || 1,
+      store: Object.assign({}, DEFAULT_DATA.store, parsed.store || {}),
+      products: Array.isArray(parsed.products) ? parsed.products : structuredClone(DEFAULT_DATA.products),
+      users: Array.isArray(parsed.users) && parsed.users.length ? parsed.users : structuredClone(DEFAULT_DATA.users)
+    };
+  } catch (err) {
+    console.warn('تعذر قراءة البيانات المحفوظة، سيتم استخدام النسخة الافتراضية.', err);
+    return structuredClone(DEFAULT_DATA);
+  }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+}
+
+let DB = loadData();
+
+/* ===================== أدوات مساعدة ===================== */
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+const CURRENCY = () => DB.store.currency || 'ل.س';
+const money = (n) => new Intl.NumberFormat('ar-SY', { maximumFractionDigits: 0 }).format(Number(n) || 0) + ' ' + CURRENCY();
+
+function toast(msg, type = 'info') {
+  const t = $('#toast');
+  const colors = {
+    info: 'bg-[#0D2855]',
+    success: 'bg-emerald-600',
+    error: 'bg-rose-600',
+    warn: 'bg-amber-500'
+  };
+  t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-bold z-[70] transition-all duration-300 opacity-100 translate-y-0 ' + (colors[type] || colors.info);
+  t.textContent = msg;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.classList.remove('opacity-100', 'translate-y-0');
+    t.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+  }, 2800);
+}
+
+const ROLE_LABELS = { admin: 'مدير عام', editor: 'محرر', viewer: 'مشاهد' };
+const ROLE_BADGES = {
+  admin: 'bg-purple-100 text-purple-700 border-purple-200',
+  editor: 'bg-blue-100 text-blue-700 border-blue-200',
+  viewer: 'bg-slate-100 text-slate-600 border-slate-200'
+};
+
+function nextId(list) {
+  return list.reduce((max, item) => Math.max(max, Number(item.id) || 0), 0) + 1;
+}
+
+function openModal(id) {
+  const m = $('#' + id);
+  m.classList.remove('hidden');
+  m.classList.add('grid');
+}
+function closeModal(id) {
+  const m = $('#' + id);
+  m.classList.add('hidden');
+  m.classList.remove('grid');
+}
+
+let confirmCallback = null;
+function askConfirm({ title, text, icon = '⚠️', confirmLabel = 'نعم، تأكيد' }, cb) {
+  $('#confirmTitle').textContent = title;
+  $('#confirmText').textContent = text;
+  $('#confirmIcon').textContent = icon;
+  $('#confirmYes').textContent = confirmLabel;
+  confirmCallback = cb;
+  openModal('confirmModal');
+}
+$('#confirmYes').onclick = () => { closeModal('confirmModal'); if (confirmCallback) confirmCallback(); confirmCallback = null; };
+$('#confirmNo').onclick = () => { closeModal('confirmModal'); confirmCallback = null; };
+
+$$('[data-close-modal]').forEach(btn => {
+  btn.onclick = () => closeModal(btn.dataset.closeModal);
+});
+
+/* ===================== الجلسة ===================== */
+const SESSION_KEY = 'ronziSession';
+let currentUser = null;
+
+function getSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    return DB.users.find(u => u.id === s.id && u.active !== false) || null;
+  } catch { return null; }
+}
+function setSession(user) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id, at: Date.now() }));
+}
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function can(perm) {
+  if (!currentUser) return false;
+  const role = currentUser.role;
+  if (role === 'admin') return true;
+  if (role === 'editor') return perm === 'products' || perm === 'settings';
+  if (role === 'viewer') return perm === 'read';
+  return false;
+}
+
+/* ===================== تسجيل الدخول ===================== */
+$('#togglePassBtn').onclick = () => {
+  const p = $('#loginPass');
+  p.type = p.type === 'password' ? 'text' : 'password';
+};
+
+$('#loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const idf = $('#loginUser').value.trim().toLowerCase();
+  const pass = $('#loginPass').value;
+  const errBox = $('#loginError');
+
+  if (!idf || !pass) {
+    errBox.textContent = 'يرجى تعبئة اسم المستخدم وكلمة المرور';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  const user = DB.users.find(u =>
+    (u.username.toLowerCase() === idf || (u.email || '').toLowerCase() === idf) &&
+    u.password === pass
+  );
+
+  if (!user) {
+    errBox.textContent = 'بيانات الدخول غير صحيحة — تأكد من اسم المستخدم وكلمة المرور';
+    errBox.classList.remove('hidden');
+    return;
+  }
+  if (user.active === false) {
+    errBox.textContent = 'هذا الحساب موقوف — تواصل مع المدير العام';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  errBox.classList.add('hidden');
+  currentUser = user;
+  setSession(user);
+  enterApp();
+});
+
+function logout() {
+  clearSession();
+  currentUser = null;
+  $('#appScreen').classList.add('hidden');
+  $('#loginScreen').classList.remove('hidden');
+  $('#loginForm').reset();
+  $('#loginPass').type = 'password';
+}
+
+function enterApp() {
+  $('#loginScreen').classList.add('hidden');
+  $('#appScreen').classList.remove('hidden');
+  $('#topUserName').textContent = currentUser.name;
+  $('#topUserRole').textContent = ROLE_LABELS[currentUser.role] || currentUser.role;
+  $('#topUserAvatar').textContent = (currentUser.name || 'A').trim().charAt(0).toUpperCase();
+  applyPermissions();
+  renderAll();
+  navigate('overview');
+}
+
+function applyPermissions() {
+  const isViewer = currentUser.role === 'viewer';
+  $('#addProductBtn').style.display = isViewer ? 'none' : '';
+  $('#addUserBtn').style.display = currentUser.role === 'admin' ? '' : 'none';
+  $('#resetBtn').style.display = currentUser.role === 'admin' ? '' : 'none';
+  $('#exportBtn').style.display = currentUser.role === 'admin' ? '' : 'none';
+  $$('[data-nav="users"]').forEach(el => { el.style.display = currentUser.role === 'admin' ? '' : 'none'; });
+}
+
+/* ===================== التنقل ===================== */
+const PAGE_META = {
+  overview: { title: 'نظرة عامة', sub: 'ملخص حالة المتجر' },
+  products: { title: 'المنتجات', sub: 'أضف وعدّل أسعار ومنتجات المتجر' },
+  users: { title: 'المستخدمون', sub: 'إدارة حسابات الداشبورد وصلاحياتها' },
+  settings: { title: 'إعدادات المتجر', sub: 'بيانات المتجر وأمان الحساب' }
+};
+
+function navigate(page) {
+  if (page === 'users' && currentUser.role !== 'admin') page = 'overview';
+  $$('.page').forEach(s => s.classList.toggle('hidden', s.dataset.page !== page));
+  $$('.nav-btn').forEach(b => {
+    const on = b.dataset.nav === page;
+    b.classList.toggle('bg-[#F26522]', on);
+    b.classList.toggle('text-white', on);
+    b.classList.toggle('text-white/70', !on);
+  });
+  const meta = PAGE_META[page] || PAGE_META.overview;
+  $('#pageTitle').textContent = meta.title;
+  $('#pageSub').textContent = meta.sub;
+  closeSidebar();
+}
+
+$$('.nav-btn').forEach(b => b.onclick = () => navigate(b.dataset.nav));
+$$('[data-goto]').forEach(b => b.onclick = () => navigate(b.dataset.goto));
+
+function openSidebar() {
+  $('#sidebar').classList.remove('translate-x-full');
+  $('#sidebarOverlay').classList.remove('hidden');
+}
+function closeSidebar() {
+  if (window.innerWidth < 1024) {
+    $('#sidebar').classList.add('translate-x-full');
+    $('#sidebarOverlay').classList.add('hidden');
+  }
+}
+$('#openSidebar').onclick = openSidebar;
+$('#closeSidebar').onclick = closeSidebar;
+$('#sidebarOverlay').onclick = closeSidebar;
+
+$('#logoutBtn').onclick = () => {
+  askConfirm({ title: 'تسجيل الخروج', text: 'هل تريد الخروج من لوحة التحكم؟', icon: '🚪', confirmLabel: 'خروج' }, logout);
+};
+
+/* ===================== نظرة عامة ===================== */
+function renderOverview() {
+  const active = DB.products.filter(p => p.active !== false);
+  $('#statProducts').textContent = active.length;
+  $('#statValue').textContent = money(active.reduce((s, p) => s + (Number(p.price) || 0), 0));
+  $('#statUsers').textContent = DB.users.length;
+  $('#statCats').textContent = new Set(active.map(p => p.cat).filter(Boolean)).size;
+
+  const recent = [...active].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 5);
+  const box = $('#recentProducts');
+  if (!recent.length) {
+    box.innerHTML = '<div class="p-6 text-center text-sm text-slate-400">لا توجد منتجات بعد</div>';
+  } else {
+    box.innerHTML = recent.map(p => `
+      <div class="px-5 py-3.5 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">${(p.colors && p.colors[0] && p.colors[0].icon) || '📦'}</div>
+        <div class="flex-grow min-w-0">
+          <div class="font-bold text-sm text-slate-800 truncate">${escapeHtml(p.name)}</div>
+          <div class="text-xs text-slate-500">${escapeHtml(p.cat || '')}</div>
+        </div>
+        <div class="font-black text-sm text-[#0D2855] whitespace-nowrap">${money(p.price)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ===================== المنتجات ===================== */
+function filteredProducts() {
+  const q = ($('#productSearch').value || '').trim().toLowerCase();
+  if (!q) return DB.products;
+  return DB.products.filter(p =>
+    String(p.name).toLowerCase().includes(q) ||
+    String(p.cat).toLowerCase().includes(q) ||
+    String(p.desc).toLowerCase().includes(q)
+  );
+}
+
+function renderProducts() {
+  const rows = filteredProducts();
+  const body = $('#productsTableBody');
+  const empty = $('#productsEmpty');
+
+  if (!rows.length) {
+    body.innerHTML = '';
+    empty.classList.remove('hidden');
+  } else {
+    empty.classList.add('hidden');
+    body.innerHTML = rows.map(p => {
+      const isOn = p.active !== false;
+      const colors = (p.colors || []).map(c => `<span class="inline-block text-base" title="${escapeHtml(c.name)}">${c.icon || '🎨'}</span>`).join(' ');
+      return `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">${(p.colors && p.colors[0] && p.colors[0].icon) || '📦'}</div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-800 truncate max-w-[220px]">${escapeHtml(p.name)}</div>
+                <div class="text-[11px] text-slate-400 truncate max-w-[220px]">${escapeHtml((p.desc || '').slice(0, 60))}${(p.desc || '').length > 60 ? '…' : ''}</div>
+              </div>
+            </div>
+          </td>
+          <td class="py-3 px-4"><span class="text-xs font-bold text-[#F26522]">${escapeHtml(p.cat || '—')}</span></td>
+          <td class="py-3 px-4 font-black text-[#0D2855] whitespace-nowrap">${money(p.price)}</td>
+          <td class="py-3 px-4 text-center whitespace-nowrap">${colors || '<span class="text-xs text-slate-400">—</span>'}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="text-[11px] font-black px-2.5 py-1 rounded-full border ${isOn ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}">
+              ${isOn ? 'ظاهر' : 'مخفي'}
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            <div class="flex items-center justify-center gap-1.5">
+              <button data-toggle-product="${p.id}" title="${isOn ? 'إخفاء' : 'إظهار'}"
+                      class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors ${can('products') ? '' : 'opacity-40 pointer-events-none'}">
+                ${isOn ? '🙈' : '👁️'}
+              </button>
+              <button data-edit-product="${p.id}" title="تعديل"
+                      class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-[#0D2855]/5 hover:border-[#0D2855] text-[#0D2855] flex items-center justify-center transition-colors ${can('products') ? '' : 'opacity-40 pointer-events-none'}">
+                ✏️
+              </button>
+              <button data-del-product="${p.id}" title="حذف"
+                      class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-rose-50 hover:border-rose-300 text-rose-600 flex items-center justify-center transition-colors ${can('products') ? '' : 'opacity-40 pointer-events-none'}">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // ربط الأحداث
+  $$('[data-edit-product]').forEach(b => b.onclick = () => openProductForm(Number(b.dataset.editProduct)));
+  $$('[data-del-product]').forEach(b => b.onclick = () => deleteProduct(Number(b.dataset.delProduct)));
+  $$('[data-toggle-product]').forEach(b => b.onclick = () => toggleProductActive(Number(b.dataset.toggleProduct)));
+
+  $('#navProductCount').textContent = DB.products.length;
+
+  const cats = [...new Set(DB.products.map(p => p.cat).filter(Boolean))];
+  $('#catList').innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+}
+
+$('#productSearch').addEventListener('input', renderProducts);
+
+let colorRowSeq = 0;
+function addColorRow(name = '', icon = '🎨') {
+  colorRowSeq++;
+  const wrap = document.createElement('div');
+  wrap.className = 'flex gap-2 items-center';
+  wrap.innerHTML = `
+    <input value="${escapeHtml(icon)}" data-color-icon placeholder="🎨" maxlength="4"
+           class="w-16 px-2 py-2 rounded-lg border border-slate-300 text-center text-lg focus:outline-none focus:border-[#0D2855]">
+    <input value="${escapeHtml(name)}" data-color-name placeholder="اسم اللون / النوع"
+           class="flex-grow px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:border-[#0D2855]">
+    <button type="button" class="w-9 h-9 rounded-lg border border-slate-200 hover:bg-rose-50 hover:border-rose-300 text-rose-500 shrink-0">✕</button>
+  `;
+  wrap.querySelector('button').onclick = () => wrap.remove();
+  $('#colorRows').appendChild(wrap);
+}
+$('#addColorRow').onclick = () => addColorRow();
+
+function openProductForm(id) {
+  const form = $('#productForm');
+  form.reset();
+  $('#colorRows').innerHTML = '';
+  colorRowSeq = 0;
+
+  if (id) {
+    const p = DB.products.find(x => x.id === id);
+    if (!p) return;
+    $('#productModalTitle').textContent = 'تعديل المنتج';
+    $('#pfId').value = p.id;
+    $('#pfName').value = p.name || '';
+    $('#pfCat').value = p.cat || '';
+    $('#pfPrice').value = p.price ?? '';
+    $('#pfRating').value = p.rating || '';
+    $('#pfTag').value = p.tag || '';
+    $('#pfDesc').value = p.desc || '';
+    $('#pfActive').checked = p.active !== false;
+    (p.colors && p.colors.length ? p.colors : [{ name: '', icon: '🎨' }])
+      .forEach(c => addColorRow(c.name, c.icon));
+  } else {
+    $('#productModalTitle').textContent = 'إضافة منتج جديد';
+    $('#pfId').value = '';
+    $('#pfActive').checked = true;
+    addColorRow('', '🎨');
+  }
+  openModal('productModal');
+}
+
+$('#addProductBtn').onclick = () => openProductForm(null);
+
+$('#productForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!can('products')) { toast('ما عندك صلاحية تعديل المنتجات', 'error'); return; }
+
+  const id = $('#pfId').value ? Number($('#pfId').value) : null;
+  const name = $('#pfName').value.trim();
+  const cat = $('#pfCat').value.trim();
+  const price = Number($('#pfPrice').value);
+  const desc = $('#pfDesc').value.trim();
+
+  if (!name || !cat || !desc) { toast('يرجى تعبئة الحقول الإجبارية', 'error'); return; }
+  if (!Number.isFinite(price) || price < 0) { toast('يرجى إدخال سعر صحيح', 'error'); return; }
+
+  const colors = $$('#colorRows > div').map(row => ({
+    icon: (row.querySelector('[data-color-icon]').value || '🎨').trim() || '🎨',
+    name: row.querySelector('[data-color-name]').value.trim()
+  })).filter(c => c.name);
+
+  if (!colors.length) colors.push({ name: 'افتراضي', icon: '📦' });
+
+  const payload = { name, cat, price, desc, colors, tag: $('#pfTag').value.trim(), rating: $('#pfRating').value.trim(), active: $('#pfActive').checked };
+
+  if (id) {
+    const idx = DB.products.findIndex(p => p.id === id);
+    DB.products[idx] = Object.assign({}, DB.products[idx], payload, { updatedAt: new Date().toISOString() });
+    toast('تم تحديث المنتج بنجاح ✓', 'success');
+  } else {
+    DB.products.push(Object.assign({ id: nextId(DB.products), createdAt: new Date().toISOString() }, payload));
+    toast('تمت إضافة المنتج بنجاح ✓', 'success');
+  }
+
+  saveData();
+  closeModal('productModal');
+  renderProducts();
+  renderOverview();
+});
+
+function deleteProduct(id) {
+  if (!can('products')) { toast('ما عندك صلاحية الحذف', 'error'); return; }
+  const p = DB.products.find(x => x.id === id);
+  if (!p) return;
+  askConfirm({
+    title: 'حذف المنتج',
+    text: `هل أنت متأكد من حذف «${p.name}»؟ لا يمكن التراجع عن هذه العملية.`,
+    icon: '🗑️',
+    confirmLabel: 'حذف نهائي'
+  }, () => {
+    DB.products = DB.products.filter(x => x.id !== id);
+    saveData();
+    renderProducts();
+    renderOverview();
+    toast('تم حذف المنتج', 'success');
+  });
+}
+
+function toggleProductActive(id) {
+  if (!can('products')) { toast('ما عندك صلاحية التعديل', 'error'); return; }
+  const p = DB.products.find(x => x.id === id);
+  if (!p) return;
+  p.active = p.active === false;
+  p.updatedAt = new Date().toISOString();
+  saveData();
+  renderProducts();
+  renderOverview();
+  toast(p.active ? 'المنتج صار ظاهر في المتجر' : 'تم إخفاء المنتج من المتجر', 'success');
+}
+
+/* ===================== المستخدمون ===================== */
+function renderUsers() {
+  const grid = $('#usersGrid');
+  const isAdmin = currentUser.role === 'admin';
+
+  if (!DB.users.length) {
+    grid.innerHTML = '<div class="col-span-full p-12 text-center text-slate-400"><div class="text-5xl mb-3">👥</div><h3 class="font-bold text-slate-700">لا يوجد مستخدمون</h3></div>';
+    return;
+  }
+
+  grid.innerHTML = DB.users.map(u => {
+    const isMe = u.id === currentUser.id;
+    const badge = ROLE_BADGES[u.role] || ROLE_BADGES.viewer;
+    return `
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col">
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-12 h-12 rounded-xl bg-[#0D2855] text-white flex items-center justify-center font-black text-lg shrink-0">
+            ${escapeHtml((u.name || '?').trim().charAt(0).toUpperCase())}
+          </div>
+          <div class="flex-grow min-w-0">
+            <div class="font-black text-[#0D2855] truncate flex items-center gap-2">
+              ${escapeHtml(u.name)}
+              ${isMe ? '<span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full shrink-0">أنت</span>' : ''}
+            </div>
+            <div class="text-xs text-slate-500 font-mono truncate" dir="ltr">@${escapeHtml(u.username)}</div>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs mb-4 flex-grow">
+          <div class="flex justify-between gap-2">
+            <span class="text-slate-500">الصلاحية</span>
+            <span class="font-black px-2 py-0.5 rounded-full border ${badge}">${ROLE_LABELS[u.role] || u.role}</span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="text-slate-500">البريد</span>
+            <span class="font-bold text-slate-700 truncate max-w-[150px]" dir="ltr">${u.email ? escapeHtml(u.email) : '—'}</span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="text-slate-500">الحالة</span>
+            <span class="font-black ${u.active === false ? 'text-rose-600' : 'text-emerald-600'}">${u.active === false ? 'موقوف' : 'نشط'}</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2 pt-3 border-t border-slate-100">
+          <button data-edit-user="${u.id}" class="flex-1 text-xs font-bold py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors ${isAdmin ? '' : 'opacity-40 pointer-events-none'}">تعديل</button>
+          <button data-toggle-user="${u.id}" class="flex-1 text-xs font-bold py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors ${isAdmin ? '' : 'opacity-40 pointer-events-none'}">${u.active === false ? 'تفعيل' : 'إيقاف'}</button>
+          <button data-del-user="${u.id}" class="px-3 text-xs font-bold py-2 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 transition-colors ${isAdmin ? '' : 'opacity-40 pointer-events-none'} ${isMe ? 'opacity-40 pointer-events-none' : ''}">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  $$('[data-edit-user]').forEach(b => b.onclick = () => openUserForm(Number(b.dataset.editUser)));
+  $$('[data-del-user]').forEach(b => b.onclick = () => deleteUser(Number(b.dataset.delUser)));
+  $$('[data-toggle-user]').forEach(b => b.onclick = () => toggleUserActive(Number(b.dataset.toggleUser)));
+
+  $('#navUserCount').textContent = DB.users.length;
+  $('#statUsers').textContent = DB.users.length;
+}
+
+function openUserForm(id) {
+  if (currentUser.role !== 'admin') { toast('هذه الصلاحية للمدير العام فقط', 'error'); return; }
+  const form = $('#userForm');
+  form.reset();
+  $('#ufPass').type = 'text';
+
+  if (id) {
+    const u = DB.users.find(x => x.id === id);
+    if (!u) return;
+    $('#userModalTitle').textContent = 'تعديل المستخدم';
+    $('#ufId').value = u.id;
+    $('#ufName').value = u.name || '';
+    $('#ufUser').value = u.username || '';
+    $('#ufEmail').value = u.email || '';
+    $('#ufRole').value = u.role || 'editor';
+    $('#ufPass').value = u.password || '';
+    $('#ufPassHint').textContent = 'اتركها كما هي إذا ما بدك تغيّر كلمة المرور.';
+  } else {
+    $('#userModalTitle').textContent = 'إضافة مستخدم';
+    $('#ufId').value = '';
+    $('#ufRole').value = 'editor';
+    $('#ufPassHint').textContent = 'تُخزَّن محلياً بشكل واضح — مناسبة للتجربة فقط.';
+  }
+  openModal('userModal');
+}
+
+$('#addUserBtn').onclick = () => openUserForm(null);
+
+$('#userForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (currentUser.role !== 'admin') { toast('هذه الصلاحية للمدير العام فقط', 'error'); return; }
+
+  const id = $('#ufId').value ? Number($('#ufId').value) : null;
+  const name = $('#ufName').value.trim();
+  const username = $('#ufUser').value.trim();
+  const email = $('#ufEmail').value.trim();
+  const role = $('#ufRole').value;
+  const password = $('#ufPass').value;
+
+  if (!name || !username || !password) { toast('يرجى تعبئة الحقول الإجبارية', 'error'); return; }
+  if (password.length < 6) { toast('كلمة المرور لازم 6 أحرف على الأقل', 'error'); return; }
+
+  const taken = DB.users.some(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== id);
+  if (taken) { toast('اسم المستخدم محجوز — جرّب اسماً آخر', 'error'); return; }
+
+  const payload = { name, username, email, role, password };
+
+  if (id) {
+    const idx = DB.users.findIndex(u => u.id === id);
+    DB.users[idx] = Object.assign({}, DB.users[idx], payload);
+    if (currentUser.id === id) {
+      currentUser = DB.users[idx];
+      $('#topUserName').textContent = currentUser.name;
+      $('#topUserRole').textContent = ROLE_LABELS[currentUser.role] || currentUser.role;
+      $('#topUserAvatar').textContent = (currentUser.name || 'A').trim().charAt(0).toUpperCase();
+      applyPermissions();
+    }
+    toast('تم تحديث بيانات المستخدم ✓', 'success');
+  } else {
+    DB.users.push(Object.assign({ id: nextId(DB.users), active: true, createdAt: new Date().toISOString() }, payload));
+    toast('تمت إضافة المستخدم بنجاح ✓', 'success');
+  }
+
+  saveData();
+  closeModal('userModal');
+  renderUsers();
+});
+
+function deleteUser(id) {
+  if (currentUser.role !== 'admin') { toast('هذه الصلاحية للمدير العام فقط', 'error'); return; }
+  if (id === currentUser.id) { toast('ما بتقدر تحذف حسابك الحالي', 'error'); return; }
+  const u = DB.users.find(x => x.id === id);
+  if (!u) return;
+
+  const admins = DB.users.filter(x => x.role === 'admin' && x.active !== false);
+  if (u.role === 'admin' && admins.length <= 1) {
+    toast('لازم يبقى مدير عام واحد على الأقل', 'error');
+    return;
+  }
+
+  askConfirm({
+    title: 'حذف المستخدم',
+    text: `سيتم حذف حساب «${u.name}» نهائياً. متأكد؟`,
+    icon: '🗑️',
+    confirmLabel: 'حذف الحساب'
+  }, () => {
+    DB.users = DB.users.filter(x => x.id !== id);
+    saveData();
+    renderUsers();
+    toast('تم حذف المستخدم', 'success');
+  });
+}
+
+function toggleUserActive(id) {
+  if (currentUser.role !== 'admin') { toast('هذه الصلاحية للمدير العام فقط', 'error'); return; }
+  if (id === currentUser.id) { toast('ما بتقدر توقف حسابك الحالي', 'error'); return; }
+  const u = DB.users.find(x => x.id === id);
+  if (!u) return;
+
+  if (u.role === 'admin' && u.active !== false) {
+    const admins = DB.users.filter(x => x.role === 'admin' && x.active !== false);
+    if (admins.length <= 1) { toast('لازم يبقى مدير عام نشط على الأقل', 'error'); return; }
+  }
+
+  u.active = u.active === false;
+  saveData();
+  renderUsers();
+  toast(u.active ? 'تم تفعيل الحساب' : 'تم إيقاف الحساب', 'success');
+}
+
+/* ===================== الإعدادات ===================== */
+function renderSettings() {
+  $('#storeNameAr').value = DB.store.nameAr || '';
+  $('#storeNameEn').value = DB.store.nameEn || '';
+  $('#storeWhatsapp').value = DB.store.whatsapp || '';
+  $('#storeShamcash').value = DB.store.shamcash || '';
+  $('#storeCoupon').value = DB.store.coupon || '';
+  $('#storeDiscount').value = DB.store.discountPercent ?? 20;
+}
+
+$('#storeForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!can('settings')) { toast('ما عندك صلاحية تعديل الإعدادات', 'error'); return; }
+  DB.store.nameAr = $('#storeNameAr').value.trim() || DEFAULT_DATA.store.nameAr;
+  DB.store.nameEn = $('#storeNameEn').value.trim() || DEFAULT_DATA.store.nameEn;
+  DB.store.whatsapp = $('#storeWhatsapp').value.trim().replace(/[^0-9]/g, '');
+  DB.store.shamcash = $('#storeShamcash').value.trim();
+  DB.store.coupon = $('#storeCoupon').value.trim() || DEFAULT_DATA.store.coupon;
+  DB.store.discountPercent = Math.min(90, Math.max(0, Number($('#storeDiscount').value) || 0));
+  saveData();
+  toast('تم حفظ إعدادات المتجر ✓', 'success');
+});
+
+$('#passForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const oldPass = $('#oldPass').value;
+  const newPass = $('#newPass').value;
+  const confirm = $('#confirmPass').value;
+
+  if (oldPass !== currentUser.password) { toast('كلمة المرور الحالية غير صحيحة', 'error'); return; }
+  if (newPass.length < 6) { toast('كلمة المرور الجديدة لازم 6 أحرف على الأقل', 'error'); return; }
+  if (newPass !== confirm) { toast('كلمتا المرور غير متطابقتين', 'error'); return; }
+
+  const idx = DB.users.findIndex(u => u.id === currentUser.id);
+  DB.users[idx].password = newPass;
+  currentUser = DB.users[idx];
+  saveData();
+  $('#passForm').reset();
+  toast('تم تحديث كلمة المرور ✓', 'success');
+});
+
+$('#exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ronzi-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('تم تنزيل النسخة الاحتياطية ✓', 'success');
+};
+
+$('#resetBtn').onclick = () => {
+  askConfirm({
+    title: 'إعادة ضبط المصنع',
+    text: 'سيتم حذف كل المنتجات والمستخدمين اللي ضفتهم وارجاع البيانات الافتراضية. متأكد؟',
+    icon: '♻️',
+    confirmLabel: 'نعم، ارجع للأصل'
+  }, () => {
+    DB = structuredClone(DEFAULT_DATA);
+    saveData();
+    toast('تمت إعادة الضبط — يرجى تسجيل الدخول من جديد', 'success');
+    setTimeout(logout, 800);
+  });
+};
+
+/* ===================== تشغيل ===================== */
+function renderAll() {
+  renderOverview();
+  renderProducts();
+  renderUsers();
+  renderSettings();
+}
+
+(function init() {
+  const session = getSession();
+  if (session) {
+    currentUser = session;
+    enterApp();
+  } else {
+    $('#loginScreen').classList.remove('hidden');
+    $('#appScreen').classList.add('hidden');
+  }
+})();
+</script>
+</body>
+</html>
